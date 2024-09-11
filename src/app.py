@@ -37,10 +37,14 @@ def sitemap():
     return generate_sitemap(app)
 
 @app.route('/user', methods=['GET'])
-def handle_hello():
+def get_users():
 
     response_body = {
-        "msg": "Hello, this is your GET /user response "
+    [
+        {"id": 1, "name": "Valdomero", "email": "valdo@mero.es","lastname":"Pinto","subscription":"01-27"},
+        {"id": 2, "name": "Yezica", "email": "jessica@get.es","lastname":"Mandilas","subscription":"10-11"},
+    ]
+
     }
 
     return jsonify(response_body), 200
