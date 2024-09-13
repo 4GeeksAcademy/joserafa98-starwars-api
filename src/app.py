@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User
+from models import db, User, Planets
 #from models import Person
 
 app = Flask(__name__)
@@ -38,17 +38,44 @@ def sitemap():
 
 @app.route('/user', methods=['GET'])
 def get_users():
+    users = User.query.all()  
+    response_body = [user.serialize() for user in users]  
+    return jsonify(response_body)
 
-    response_body = {
-    [
-        {"id": 1, "name": "Valdomero", "email": "valdo@mero.es","lastname":"Pinto","subscription":"01-27"},
-        {"id": 2, "name": "Yezica", "email": "jessica@get.es","lastname":"Mandilas","subscription":"10-11"},
-    ]
+@app.route('/user', methods=['POST'])
+def create_users():
+    data = request.json
+    new_user = User(
+        name=data['name'],
+        lastname=data['lastname'],
+        username=data['username'],
+        email=data['email'],
+        password=data['password'],
+        is_active=data.get('is_active', True) 
+    )
+    db.session.add(new_user)
+    db.session.commit()
+    return jsonify(new_user.serialize()), 201
 
-    }
+@app.route('/planet', methods=['GET'])
+def get_planets():
+    planets = Planets.query.all()  
+    response_body = [planet.serialize() for planet in planets]  
+    return jsonify(response_body)
 
-    return jsonify(response_body), 200
+@app.route('/planet', methods=['POST'])
+def create_planets():
+    data = request.json
+    new_planet = Planets(
+        name=data['name'],
+        population=data['population'],
+        location=data['location'],
+    )
+    db.session.add(new_planet)
+    db.session.commit()
+    return jsonify(new_planet.serialize()), 201
 
+    
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))
