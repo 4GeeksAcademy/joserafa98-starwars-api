@@ -106,6 +106,20 @@ def add_favorite_planet(planet_id):
 
     return jsonify({"msg": "Planet added to favorites"}), 201
 
+@app.route('/favorite/planet/<int:planet_id>', methods=['DELETE'])
+def delete_favorite_planet(planet_id):
+
+    favorite = Favorites.query.filter_by(planet_id=planet_id).first()
+
+    if favorite is None:
+        return jsonify({"msg": "Favorite planet not found"}), 404
+
+    
+    db.session.delete(favorite)
+    db.session.commit()
+
+    return jsonify({"msg": f"Planet with id {planet_id} has been eliminated from favorites by the Empire"}), 200
+
 
 @app.route('/character', methods=['GET'])
 def get_characters():
@@ -147,7 +161,20 @@ def add_favorite_character(character_id):
 
     return jsonify({"msg": "Character added to favorites"}), 201
 
+@app.route('/favorite/character/<int:character_id>', methods=['DELETE'])
+def delete_favorite_character(character_id):
+
+    favorite = Favorites.query.filter_by(character_id=character_id).first()
+
+    if favorite is None:
+        return jsonify({"msg": "Favorite character not found"}), 404
+
     
+    db.session.delete(favorite)
+    db.session.commit()
+
+    return jsonify({"msg": f"Character with id {character_id} has been eliminated by the Order 66"}), 200    
+
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))
