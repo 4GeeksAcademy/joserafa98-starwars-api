@@ -65,20 +65,6 @@ def get_user_favorites(user_id):
     
     return jsonify(response_body)
 
-# @app.route('/user', methods=['POST'])
-# def create_users():
-#     data = request.json
-#     new_user = User(
-#         name=data['name'],
-#         lastname=data['lastname'],
-#         username=data['username'],
-#         email=data['email'],
-#         password=data['password'],
-#         is_active=data.get('is_active', True) 
-#     )
-#     db.session.add(new_user)
-#     db.session.commit()
-#     return jsonify(new_user.serialize()), 201
 
 @app.route('/planet', methods=['GET'])
 def get_planets():
@@ -93,18 +79,33 @@ def get_planet(planet_id):
         return jsonify({"error": "Planet not found"}), 404
     return jsonify(planet.serialize())
 
+@app.route('/favorite/planet/<int:planet_id>', methods=['POST'])
+def add_favorite_planet(planet_id):
+    data = request.get_json()  
 
-# @app.route('/planet', methods=['POST'])
-# def create_planets():
-#     data = request.json
-#     new_planet = Planets(
-#         name=data['name'],
-#         population=data['population'],
-#         location=data['location'],
-#     )
-#     db.session.add(new_planet)
-#     db.session.commit()
-#     return jsonify(new_planet.serialize()), 201
+    user_id = data.get('user_id')
+
+    user = User.query.get(user_id)
+    planet = Planets.query.get(planet_id)
+
+    if not user:
+        return jsonify({"msg": "User doesn't exist"}), 404
+    if not planet:
+        return jsonify({"msg": "Planet not found or destroyed"}), 404
+
+    
+    existing_favorite = Favorites.query.filter_by(user_id=user_id, planet_id=planet_id).first()
+    if existing_favorite:
+        return jsonify({"msg": "You got this on favorite already"}), 400
+
+    
+    new_favorite = Favorites(user_id=user_id, planet_id=planet_id)
+
+    db.session.add(new_favorite)
+    db.session.commit()
+
+    return jsonify({"msg": "Planet added to favorites"}), 201
+
 
 @app.route('/character', methods=['GET'])
 def get_characters():
@@ -119,18 +120,32 @@ def get_character(character_id):
         return jsonify({"error": "Character doesn't exist"}), 404
     return jsonify(character.serialize())
 
-# @app.route('/character', methods=['POST'])
-# def create_characters():
-#     data = request.json
-#     new_character = Characters(
-#         name=data['name'],
-#         height=data['height'],
-#         gender=data['gender'],
-#         eye_color=data['eye_color'],
-#     )
-#     db.session.add(new_character)
-#     db.session.commit()
-#     return jsonify(new_character.serialize()), 201
+@app.route('/favorite/character/<int:character_id>', methods=['POST'])
+def add_favorite_character(character_id):
+    data = request.get_json()  
+
+    user_id = data.get('user_id')
+
+    user = User.query.get(user_id)
+    character = Characters.query.get(character_id)
+
+    if not user:
+        return jsonify({"msg": "User doesn't exist"}), 404
+    if not character:
+        return jsonify({"msg": "Character not found or be killed"}), 404
+
+    
+    existing_favorite = Favorites.query.filter_by(user_id=user_id, character_id=character_id).first()
+    if existing_favorite:
+        return jsonify({"msg": "You got this on favorite already"}), 400
+
+    
+    new_favorite = Favorites(user_id=user_id, character_id=character_id)
+
+    db.session.add(new_favorite)
+    db.session.commit()
+
+    return jsonify({"msg": "Character added to favorites"}), 201
 
     
 # this only runs if `$ python src/app.py` is executed
